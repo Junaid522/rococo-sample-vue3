@@ -8,20 +8,19 @@ import { handleAuthRequest, handleForgotPasswordRequest } from '@/utils/apiHelpe
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: localStorageService.getItem('user') || null, // Initialize from localStorage
-    accessToken: localStorageService.getItem('accessToken') || null, // Initialize from localStorage
-    accessTokenExpiry: localStorageService.getItem('accessTokenExpiry') || null, // Initialize from localStorage
+    user: localStorageService.getItem('user') || null,
+    accessToken: localStorageService.getItem('accessToken') || null,
+    accessTokenExpiry: localStorageService.getItem('accessTokenExpiry') || null,
   }),
 
   getters: {
-    // Computed property for isAuthenticated
     isAuthenticated: (state) => {
       if (!state.accessToken || !state.accessTokenExpiry) {
-        return false; // No token or expiry date
+        return false;
       }
 
-      const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds (UNIX timestamp)
-      return currentTime < state.accessTokenExpiry; // Check if token is still valid
+      const currentTime = Math.floor(Date.now() / 1000);
+      return currentTime < state.accessTokenExpiry;
     },
   },
 
@@ -64,6 +63,41 @@ export const useAuthStore = defineStore('auth', {
       return handleAuthRequest(this, () =>
         axios.post(`/auth/reset_password/${token}/${uidb64}`, payload), this.router
       );
+    },
+
+    async updateUser (payload, id) {
+      try {
+        const userPayload = {
+          first_name: payload.first_name.value,
+          last_name: payload.last_name.value,
+        };
+
+        const response = await axios.put(`/person/me/${id}`, userPayload);
+
+        if (response.data?.success) {
+          this.user.first_name = payload.first_name;
+          this.user.last_name = payload.last_name;
+          localStorageService.setItem('user', this.user);
+          Notify.create({
+            message: "User  information updated successfully.",
+            color: "positive"
+          });
+          return true;
+        } else {
+          Notify.create({
+            message: response.data?.message || "Failed to update user information.",
+            color: "danger"
+          });
+          return false;
+        }
+      } catch (error) {
+        console.log(error, "error")
+        Notify.create({
+          message: error,
+          color: "danger"
+        });
+        return false;
+      }
     },
 
     async logout() {

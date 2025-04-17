@@ -69,14 +69,13 @@ const linksList = [
 ]
 
 const leftDrawerOpen = ref(false)
-const router = useRouter()  // Use the router instance
+const router = useRouter()
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 
-// Navigate to the profile page
 function goToProfile() {
-  router.push('/user-profile')  // Use the router to navigate to '/profile'
+  router.push('/user-profile')
 }
 </script>

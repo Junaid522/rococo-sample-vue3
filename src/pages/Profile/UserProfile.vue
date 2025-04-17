@@ -4,7 +4,6 @@
       <q-card-section class="q-pt-none text-center">
         <div class="text-h5 text-primary q-mb-md">Profile</div>
 
-        <!-- First Name Field -->
         <q-input
           outlined
           v-model="firstName"
@@ -14,7 +13,6 @@
           :rules="[val => val && val.length > 0 || 'First Name is required']"
         />
 
-        <!-- Last Name Field -->
         <q-input
           outlined
           v-model="lastName"
@@ -24,7 +22,6 @@
           :rules="[val => val && val.length > 0 || 'Last Name is required']"
         />
 
-        <!-- Save Button -->
         <q-btn
           label="Update"
           color="primary"
@@ -40,30 +37,24 @@
 <script setup>
 import { ref } from 'vue'
 import localStorageService from 'services/localStorage.service.js'
+import { useAuthStore } from 'stores/auth'
 
-// Get the user data from localStorage
+const authStore = useAuthStore()
 const user = localStorageService.getItem('user')
-
-// Initialize reactive variables for first name and last name
 const firstName = ref(user ? user.first_name : '')
 const lastName = ref(user ? user.last_name : '')
 
-// Save profile function (this can be replaced with actual logic for updating the profile)
-function saveProfile() {
-  console.log('Saving profile...', {
-    firstName: firstName.value,
-    lastName: lastName.value
-  })
-  // Update the local storage or make an API call to save the changes
-  localStorageService.setItem('user', {
-    first_name: firstName.value,
-    last_name: lastName.value
-  })
+async function saveProfile() {
+  let payload = {
+    first_name: firstName,
+    last_name: lastName
+  }
+
+  await authStore.updateUser(payload, user?.entity_id)
 }
 </script>
 
 <style scoped>
-/* Customizing the layout for a more polished UI */
 .q-card {
   background-color: #ffffff;
   border-radius: 10px;
@@ -89,12 +80,10 @@ function saveProfile() {
   padding: 20px;
 }
 
-/* Optional: Add some spacing between elements */
 .q-mb-md {
   margin-bottom: 16px;
 }
 
-/* Add a little hover effect for the button */
 .q-btn:hover {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   background-color: #1e88e5;
