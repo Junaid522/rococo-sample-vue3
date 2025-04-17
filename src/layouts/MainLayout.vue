@@ -21,6 +21,10 @@
           <q-menu fir anchor="bottom right" self="top right">
             <q-list style="min-width: 100px">
               <q-item clickable v-close-popup>
+                <!-- Navigate to the profile page -->
+                <q-item-section @click="goToProfile">Profile</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup>
                 <q-item-section @click="authStore.logout()">Logout</q-item-section>
               </q-item>
             </q-list>
@@ -47,6 +51,7 @@
 import { ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
 import { useAuthStore } from 'stores/auth'
+import { useRouter } from 'vue-router'  // Import the useRouter hook
 
 const authStore = useAuthStore()
 
@@ -56,11 +61,21 @@ const linksList = [
     icon: 'code',
     link: '/dashboard',
   },
+  {
+    title: 'Add Task',
+    icon: 'task',
+    link: '/add-task'
+  },
 ]
 
 const leftDrawerOpen = ref(false)
+const router = useRouter()
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
+}
+
+function goToProfile() {
+  router.push('/user-profile')
 }
 </script>
