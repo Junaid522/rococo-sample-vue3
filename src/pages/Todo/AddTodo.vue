@@ -1,6 +1,6 @@
 <template>
   <q-page class="flex flex-center q-pa-md">
-    <q-card class="q-pa-md" style="max-width: 650px; width: 100%; border-radius: 12px; box-shadow: none">
+    <q-card class="q-pa-md" style="max-width: 500px; width: 100%; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1)">
       <q-card-section class="q-pt-none">
         <div class="text-h5 text-primary text-center q-mb-md">Add Tasks</div>
 
@@ -23,53 +23,30 @@
         />
 
         <q-btn
-          :label="'Add Task'"
+          :label="isEditing ? 'Update Task' : 'Add Task'"
           color="primary"
           class="full-width q-mb-md"
-          @click="addTodo"
+          @click="isEditing ? updateTodo({ ...taskSelected, title: newTodo }, $event, false) : addTodo()"
           :disabled="!newTodo.trim()"
         />
 
         <!-- Todo List -->
-        <q-list class="scrollable-list">
+        <q-list>
           <q-item v-for="(todo, index) in filteredTodos" :key="index" class="q-mb-xs">
             <q-item-section>
               <div class="flex items-center justify-between">
-                <label class="custom-checkbox">
+                <div>
                   <input type="checkbox"
                          v-model="todo.is_completed"
                          @click="updateTodo({ ...todo, is_completed: !todo.is_completed, title: todo.title }, $event, false)"
                          class="q-mr-md"
                   />
-                  <span class="checkmark"></span>
-                </label>
-                <div v-if="isEditing && index === taskSelectedIndex" class="flex" style="flex-grow: 1; display: flex; align-items: center;">
-                  <q-input
-                    filled
-                    v-model="newTodo"
-                    label="What needs to be done?"
-                    dense
-                    autofocus
-                    class="q-mb-md"
-                    style="flex-grow: 1; margin-right: 10px;"
-                  />
-                  <q-btn
-                    icon="check"
-                    @click="updateTodo({ ...taskSelected, title: newTodo }, $event, false)"
-                    class="q-ml-md"
-                    color="primary"
-                    flat
-                    style="flex-shrink: 0;"
-                  />
+                  <span @click="taskClick(todo)" :style="{
+                    textDecoration: todo.is_completed ? 'line-through' : 'none',
+                    color: todo.is_completed ? 'red' : 'inherit'
+                  }" class="text-subtitle2 cursor-pointer">{{ todo.title }}</span>
                 </div>
-                <div v-if="!isEditing || taskSelectedIndex !== index" style="width: 520px; margin-top: 10px" class="flex justify-between">
-                  <span v-if="!isEditing || taskSelectedIndex !== index"
-                        @click="taskClick(todo, index)"
-                        :style="{
-        textDecoration: todo.is_completed ? 'line-through' : 'none',
-      }"
-                        class="text-subtitle2 cursor-pointer todo-title"
-                        style="width: 300px; max-width: 300px;">{{ todo.title }}</span>
+                <div>
                   <q-btn
                     icon="delete"
                     dense
@@ -108,7 +85,6 @@ const newTodo = ref('')
 const searchQuery = ref('')
 const isEditing = ref(false)
 const taskSelected = ref(null)
-const taskSelectedIndex = ref('')
 const taskStore = useTaskStore()
 
 onMounted(async () => {
@@ -149,7 +125,6 @@ async function updateTodo(todo, event, eventRequired) {
   await taskStore.updateTask({ ...todo, is_completed: isCompleted });
   newTodo.value = '';
   await taskStore.getTasks('all');
-  isEditing.value = false
 }
 
 async function deleteTodo(todo) {
@@ -157,11 +132,10 @@ async function deleteTodo(todo) {
   await taskStore.getTasks('all')
 }
 
-function taskClick(item, index) {
+function taskClick(item) {
   newTodo.value = item.title
   isEditing.value = true
   taskSelected.value = item
-  taskSelectedIndex.value = index
 }
 
 async function updateFilter(value) {
@@ -172,62 +146,4 @@ async function updateFilter(value) {
 
 <style scoped>
 /* Your existing styles */
-.scrollable-list {
-  max-height: 400px; /* Set a fixed height */
-  overflow-y: auto;  /* Enable vertical scrolling */
-}
-
-.custom-checkbox {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-  width: 18px; /* Adjust size as needed */
-  height: 18px; /* Adjust size as needed */
-}
-
-.custom-checkbox input {
-  opacity: 0; /* Hide the default checkbox */
-  position: absolute;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-
-.checkmark {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  background-color: transparent; /* Make the background transparent */
-  border: 2px solid #ccc; /* Border color */
-  border-radius: 50%; /* Make it circular */
-  transition: background-color 0.3s, border-color 0.3s;
-}
-
-.custom-checkbox input:checked + .checkmark {
-  background-color: transparent; /* Keep it transparent when checked */
-  border-color: green; /* Change border color when checked */
-}
-
-.custom-checkbox input:checked + .checkmark::after {
-  content: "";
-  position: absolute;
-  left: 4.5px; /* Adjust position for the checkmark */
-  top: 1.5px; /* Adjust position for the checkmark */
-  width: 5px; /* Width of the checkmark */
-  height: 10px; /* Height of the checkmark */
-  border: solid green; /* Checkmark color */
-  border-width: 0 2px 2px 0; /* Create the checkmark shape */
-  transform: rotate(45deg); /* Rotate to form a checkmark */
-}
-
-.todo-title {
-  display: inline-block; /* Ensure it behaves like a block element */
-  width: 300px; /* Fixed width */
-  max-width: 300px; /* Max width */
-  overflow: hidden; /* Hide overflow text */
-  text-overflow: ellipsis; /* Show ellipsis (...) for overflow text */
-  white-space: nowrap; /* Prevent text from wrapping to the next line */
-}
 </style>

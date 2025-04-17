@@ -3,7 +3,9 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: 'dashboard', component: () => import('pages/IndexPage.vue'), meta: { requiresAuth: true } }
+      { path: 'dashboard', component: () => import('pages/IndexPage.vue'), meta: { requiresAuth: true } },
+      { path: 'add-task', component: () => import('pages/Todo/AddTodo.vue'), meta: { requiresAuth: true } },
+      { path: 'user-profile', component: () => import('pages/Profile/UserProfile.vue'), meta: { requiresAuth: true } }
     ]
   },
 
@@ -18,9 +20,6 @@ const routes = [
     ]
   },
 
-
-  // Always leave this as last one,
-  // but you can also remove it
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue')
